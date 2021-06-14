@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "moduleResolution": "Node",
+    "target": "ES2017",
+    "outDir": "dist",
+    "noEmitOnError": true,
     "strict": true,
     "strictNullChecks": true
   }
