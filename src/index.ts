@@ -54,7 +54,7 @@ async function main(): Promise<void> {
       })
       fs.writeFileSync(
         path.resolve(__dirname, "..", outFilename),
-        xsd.end({prettyPrint:true})
+        xsd.end({ prettyPrint: true })
       )
       progressBar.terminate()
     })

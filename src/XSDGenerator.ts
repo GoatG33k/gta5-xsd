@@ -1,37 +1,37 @@
-import {create} from "xmlbuilder2"
-import {XMLBuilder} from "xmlbuilder2/lib/interfaces"
-import {Natives, NativeTypeEnum} from "./types"
+import { create } from "xmlbuilder2"
+import { XMLBuilder } from "xmlbuilder2/lib/interfaces"
+import { Natives, NativeTypeEnum } from "./types"
 import StructProperty from "./types/StructProperty"
-import CompatStructs from "./CompatStructs";
+import CompatStructs from "./CompatStructs"
 
 class XSDGenerator {
   public static nativeToXSDType(type: NativeTypeEnum): string {
     switch (type) {
       case NativeTypeEnum.CHAR:
-        return 'xs:positiveInteger'
+        return "xs:positiveInteger"
 
       case NativeTypeEnum.STRING:
       case NativeTypeEnum.ENUM:
-        return 'xs:string';
+        return "xs:string"
 
       case NativeTypeEnum.BOOL:
-        return 'xs:boolean'
+        return "xs:boolean"
 
       case NativeTypeEnum.INT:
       case NativeTypeEnum.INT64:
-        return 'xs:integer'
+        return "xs:integer"
 
       case NativeTypeEnum.SHORT:
       case NativeTypeEnum.UINT:
       case NativeTypeEnum.UINT64:
-        return 'xs:nonNegativeInteger'
+        return "xs:nonNegativeInteger"
 
       case NativeTypeEnum.FLOAT:
-        return 'RAGEFloatValue'
+        return "RAGEFloatValue"
 
       case NativeTypeEnum.UCHAR:
       case NativeTypeEnum.USHORT:
-        return 'RAGEHexAddress';
+        return "RAGEHexAddress"
 
       default:
         throw new Error("Unknown basic XSD type for " + type)
@@ -40,13 +40,15 @@ class XSDGenerator {
 
   public static generateRageElements(dom: XMLBuilder): XMLBuilder {
     const simpleContentValue = (name: string, contentValue: string) => {
-      dom = dom.ele('xs:complexType', {name})
-        .ele('xs:simpleContent')
-        .ele('xs:extension', {base: 'xs:string'})
-        .ele('xs:attribute', {name: 'content'})
-        .ele('xs:simpleType')
-        .ele('xs:restriction', {base: 'xs:string'})
-        .ele('xs:pattern', {value: contentValue}).up()
+      dom = dom
+        .ele("xs:complexType", { name })
+        .ele("xs:simpleContent")
+        .ele("xs:extension", { base: "xs:string" })
+        .ele("xs:attribute", { name: "content" })
+        .ele("xs:simpleType")
+        .ele("xs:restriction", { base: "xs:string" })
+        .ele("xs:pattern", { value: contentValue })
+        .up()
         .up()
         .up()
         .up()
@@ -55,122 +57,150 @@ class XSDGenerator {
         .up()
     }
 
-    simpleContentValue('RAGEFloatArray', 'float_array')
-    simpleContentValue('RAGEVec2Array', 'vector2_array')
-    simpleContentValue('RAGEVec2VArray', 'vec2v_array')
-    simpleContentValue('RAGEVec3Array', 'vector3_array')
-    simpleContentValue('RAGEVec3VArray', 'vec3v_array')
-    simpleContentValue('RAGEVec4Array', 'vector4_array')
-    simpleContentValue('RAGEVec4VArray', 'vec4v_array')
-    simpleContentValue('RAGEIntArray', 'int_array')
-    simpleContentValue('RAGEUCharArray', 'char_array')
+    simpleContentValue("RAGEFloatArray", "float_array")
+    simpleContentValue("RAGEVec2Array", "vector2_array")
+    simpleContentValue("RAGEVec2VArray", "vec2v_array")
+    simpleContentValue("RAGEVec3Array", "vector3_array")
+    simpleContentValue("RAGEVec3VArray", "vec3v_array")
+    simpleContentValue("RAGEVec4Array", "vector4_array")
+    simpleContentValue("RAGEVec4VArray", "vec4v_array")
+    simpleContentValue("RAGEIntArray", "int_array")
+    simpleContentValue("RAGEUCharArray", "char_array")
 
     // RAGEBooleanArray
     dom = dom
-      .ele('xs:complexType', {name: "RAGEBooleanArray"})
-      .ele('xs:sequence')
-      .ele('xs:element', {name:'Item', minOccurs: 0, maxOccurs: 'unbounded'})
-      .ele('xs:complexType')
-      .ele('xs:attribute', {name: 'value'}).up()
+      .ele("xs:complexType", { name: "RAGEBooleanArray" })
+      .ele("xs:sequence")
+      .ele("xs:element", { name: "Item", minOccurs: 0, maxOccurs: "unbounded" })
+      .ele("xs:complexType")
+      .ele("xs:attribute", { name: "value" })
+      .up()
       .up() // </xs:complexType>
       .up() // </xs:element>
       .up() // </xs:sequence>
       .up() // </xs:complexType>
 
     // RAGEBitset
-    dom = dom.ele('xs:complexType', {name: "RAGEBitset"})
-      .ele('xs:simpleContent')
-      .ele('xs:extension', {base: 'xs:string'})
-      .ele('xs:attribute', {name: 'bits', type: 'xs:nonNegativeInteger'}).up()
+    dom = dom
+      .ele("xs:complexType", { name: "RAGEBitset" })
+      .ele("xs:simpleContent")
+      .ele("xs:extension", { base: "xs:string" })
+      .ele("xs:attribute", { name: "bits", type: "xs:nonNegativeInteger" })
       .up()
+      .ele("xs:attribute", { name: "content" })
+      .ele("xs:simpleType")
+      .ele("xs:restriction", { base: "xs:string" })
+      .ele("xs:pattern", { value: "int_array" })
       .up()
-      .up()
+      .up() // </xs:restriction>
+      .up() // </xs:simpleType>
+      .up() // </xs:attribute>
+      .up() // </xs:extension>
+      .up() // </xs:simpleContent>
+      .up() // </xs:complexType>
 
     // RAGEMixedDecimal
-    dom = dom.ele('xs:simpleType', {name: "RAGEMixedDecimal"})
-      .ele('xs:restriction', {base: 'xs:string'})
-      .ele('xs:pattern', {value: '(-)?[0-9]+(\.-?[0-9]+)?'}).up()
+    dom = dom
+      .ele("xs:simpleType", { name: "RAGEMixedDecimal" })
+      .ele("xs:restriction", { base: "xs:string" })
+      .ele("xs:pattern", { value: "(-)?[0-9]+(.-?[0-9]+(e[-+][0-9]+)?)?" })
+      .up()
       .up()
       .up()
 
     // RAGEHexAddress
-    dom = dom.ele('xs:simpleType', {name: "RAGEHexAddress"})
-      .ele('xs:restriction', {base: 'xs:string'})
-      .ele('xs:pattern', {value: '0x[0-9A-F]{1,16}'}).up()
-      .ele('xs:pattern', {value: '[0-9]+'}).up()
+    dom = dom
+      .ele("xs:simpleType", { name: "RAGEHexAddress" })
+      .ele("xs:restriction", { base: "xs:string" })
+      .ele("xs:pattern", { value: "0x[0-9A-F]{1,16}" })
+      .up()
+      .ele("xs:pattern", { value: "[0-9]+" })
+      .up()
       .up()
       .up()
 
     // RAGEVoidValue
-    dom = dom.ele('xs:complexType', {name: "RAGEVoidValue"})
-      .ele('xs:attribute', {name: 'ref', type: 'xs:string'}).up()
+    dom = dom
+      .ele("xs:complexType", { name: "RAGEVoidValue" })
+      .ele("xs:attribute", { name: "ref", type: "xs:string" })
+      .up()
       .up()
 
     // RAGEUnsignedValue
-    dom = dom.ele('xs:simpleType', {name: "RAGEUnsignedValue"})
-      .ele('xs:restriction', {base: 'xs:nonNegativeInteger'}).up()
+    dom = dom
+      .ele("xs:simpleType", { name: "RAGEUnsignedValue" })
+      .ele("xs:restriction", { base: "xs:nonNegativeInteger" })
       .up()
-    return dom;
+      .up()
+    return dom
   }
 
-  public static generateElement(natives: Natives, dom: XMLBuilder, field: StructProperty): XMLBuilder {
-    let braceMatches: string[] = /^(\w+)<([\w\d_ ,]+(?:<?([\w\d_ ,]+)>)?(?:[, \d]+)?)>$/g.exec(field.typeRaw)!
+  public static generateElement(
+    natives: Natives,
+    dom: XMLBuilder,
+    field: StructProperty
+  ): XMLBuilder {
+    let braceMatches: string[] =
+      /^(\w+)<([\w\d_ ,]+(?:<?([\w\d_ ,]+)>)?(?:[, \d]+)?)>$/g.exec(
+        field.typeRaw
+      )!
     if (!braceMatches) {
       braceMatches = ["", field.typeRaw]
     } else if (braceMatches[0]) {
       braceMatches = braceMatches.filter(s => !!s)
       braceMatches = [
-        braceMatches[1].replace(/(, \d+)+/, ''),
-        ...braceMatches.slice(2)
-          .map(s => s.replace(/(, \d+)+/, ''))
-      ].filter(s => !!s).filter(s => !+s)
+        braceMatches[1].replace(/(, \d+)+/, ""),
+        ...braceMatches.slice(2).map(s => s.replace(/(, \d+)+/, ""))
+      ]
+        .filter(s => !!s)
+        .filter(s => !+s)
         .reduce((all, s) => {
-          all.push(...s.split(', '))
+          all.push(...s.split(", "))
           return all
         }, <string[]>[])
     }
 
-    const [mappingType, type, max] = braceMatches;
+    const [mappingType, type, max] = braceMatches
     if (mappingType === NativeTypeEnum.ARRAY) {
       // Handle arrays
-      let targetType: string | null;
-      const baseType = type.split(' ')[0];
+      let targetType: string | null
+      const baseType = type.split(" ")[0]
       switch (<NativeTypeEnum>baseType) {
         case NativeTypeEnum.FLOAT:
           targetType = "RAGEFloatArray"
-          break;
+          break
         case NativeTypeEnum.UCHAR:
           targetType = "RAGEUCharArray"
-          break;
+          break
         case NativeTypeEnum.UINT:
         case NativeTypeEnum.INT:
           targetType = "RAGEIntArray"
-          break;
+          break
         case NativeTypeEnum.VEC2:
           targetType = "RAGEVec2Array"
-          break;
+          break
         case NativeTypeEnum.VEC2V:
           targetType = "RAGEVec2VArray"
-          break;
+          break
         case NativeTypeEnum.VEC3:
           targetType = "RAGEVec3Array"
-          break;
+          break
         case NativeTypeEnum.VEC3V:
           targetType = "RAGEVec3VArray"
-          break;
+          break
         case NativeTypeEnum.VEC4:
           targetType = "RAGEVec4Array"
-          break;
+          break
         case NativeTypeEnum.VEC4V:
           targetType = "RAGEVec4VArray"
-          break;
+          break
         case NativeTypeEnum.MATRIX34:
         case NativeTypeEnum.MATRIX34V:
           // TODO: figure out how to type these
           return dom
         case NativeTypeEnum.BOOL:
           targetType = "RAGEBooleanArray"
-          break;
+          break
         case NativeTypeEnum.INT64:
         case NativeTypeEnum.UINT64:
           throw new Error("what?")
@@ -179,71 +209,95 @@ class XSDGenerator {
       }
 
       // special case for array<struct void>
-      if (type.split(' ')[1] === NativeTypeEnum.VOID) {
+      if (type.split(" ")[1] === NativeTypeEnum.VOID) {
         targetType = "RAGEVoidValue"
       }
 
       if (targetType) {
-        dom = dom.ele('xs:element', {
-          name: field.name, type: targetType,
-          minOccurs: 0, maxOccurs: 'unbounded'
-        }).up()
+        dom = dom
+          .ele("xs:element", {
+            name: field.name,
+            type: targetType,
+            minOccurs: 0,
+            maxOccurs: "unbounded"
+          })
+          .up()
       } else if (baseType === NativeTypeEnum.STRUCT) {
-        dom = dom.ele('xs:element', {name: field.name})
-          .ele('xs:complexType', {mixed: true})
-          .ele('xs:sequence')
+        dom = dom
+          .ele("xs:element", { name: field.name })
+          .ele("xs:complexType", { mixed: true })
+          .ele("xs:sequence")
+
+        const structName = type.split(" ")[1]
 
         // annoying fix because RAGE is silly
-        const structName = type.split(' ')[1];
-        const itemName = structName.startsWith('rage__') ? 'item' : 'Item'
+        const itemName = structName.startsWith("rage__") ? "item" : "Item"
         dom = dom
-          .ele('xs:element', {name: itemName, minOccurs: 0, maxOccurs: 'unbounded'})
-          .ele('xs:complexType')
-          .ele('xs:complexContent')
-          .ele('xs:extension', {base: structName})
-          .ele('xs:attribute', {name: 'type', type: 'xs:string'}).up()
+          .ele("xs:element", {
+            name: itemName,
+            minOccurs: 0,
+            maxOccurs: "unbounded"
+          })
+          .ele("xs:complexType")
+          .ele("xs:complexContent")
+          .ele("xs:extension", { base: structName })
+          .ele("xs:attribute", { name: "type", type: "xs:string" })
+          .up()
           .up() // </xs:extension>
           .up() // </xs:complexContent>
           .up() // </xs:complexType>
           .up() // </xs:element>
 
-        dom = dom
-          .up()
-          .up()
-          .up()
+        dom = dom.up().up().up()
       } else {
-        dom = dom.ele('xs:element', {name: field.name})
-          .ele('xs:complexType', {mixed: true})
-          .ele('xs:sequence')
+        dom = dom
+          .ele("xs:element", { name: field.name })
+          .ele("xs:complexType", { mixed: true })
+          .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
 
         // if it is a basic array type that's not already covered, let's just use xs:string
         if (Object.values(NativeTypeEnum).includes(<NativeTypeEnum>type)) {
-          dom = dom.ele('xs:element', {
-            name: 'Item',
-            minOccurs: 0, maxOccurs: 'unbounded',
-            type: this.nativeToXSDType(<NativeTypeEnum>type)
-          }).up()
+          ;["item", "Item"].forEach(name => {
+            dom = dom
+              .ele("xs:element", {
+                name,
+                type: this.nativeToXSDType(<NativeTypeEnum>type)
+              })
+              .up()
+          })
         } else {
           // nested array (array<array<struct Abc>>)
-          const nestedStruct = /^array<(?:(?:struct|enum)\s)?([\w\d_]+)>$/.exec(type)
+          const nestedStruct = /^array<(?:(?:struct|enum)\s)?([\w\d_]+)>$/.exec(
+            type
+          )
           if (type.startsWith(NativeTypeEnum.ARRAY) && nestedStruct) {
             const structField: StructProperty = {
-              name: 'item',
-              type: Object.values(NativeTypeEnum).filter(s => type.startsWith(s))[0]!,
+              name: "item",
+              type: Object.values(NativeTypeEnum).filter(s =>
+                type.startsWith(s)
+              )[0]!,
               typeRaw: type,
-              comment: ''
-            };
+              comment: ""
+            }
             dom = this.generateElement(natives, dom, structField)
           } else if (type.startsWith(NativeTypeEnum.ENUM)) {
-            dom = dom.ele('xs:element', {
-              name: 'Item', type: 'xs:string',
-              minOccurs: 0, maxOccurs: 'unbounded',
-            }).up()
+            dom = dom
+              .ele("xs:element", {
+                name: "Item",
+                type: "xs:string",
+                minOccurs: 0,
+                maxOccurs: "unbounded"
+              })
+              .up()
           } else if (type.startsWith(NativeTypeEnum.BITSET)) {
-            dom = dom.ele('xs:element', {
-              name: 'Item', type: 'RAGEBitset',
-              minOccurs: 0, maxOccurs: 'unbounded',
-            }).up()
+            dom = dom
+              .ele("xs:element", {
+                name: "Item",
+                type: "RAGEBitset",
+                minOccurs: 0,
+                maxOccurs: "unbounded"
+              })
+              .up()
           } else {
             if (!type) {
               throw new Error("Invalid struct name")
@@ -259,34 +313,38 @@ class XSDGenerator {
             }
           }
         }
-        dom = dom.up()
-          .up()
-          .up()
+        dom = dom
+          .up() // </xs:choice>
+          .up() // </xs:complexType>
+          .up() // </xs:element>
       }
       // === END ARRAY
     } else if (mappingType === NativeTypeEnum.BITSET) {
       // BITSET<>
-      dom = dom.ele('xs:element', {name: field.name, type: 'RAGEBitset'}).up()
+      dom = dom.ele("xs:element", { name: field.name, type: "RAGEBitset" }).up()
     } else if (mappingType === NativeTypeEnum.MAP) {
       // MAP<>
-      const [, iterType] = braceMatches[2].split(' ')
+      const [, iterType] = braceMatches[2].split(" ")
       let isSimple = !iterType
 
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType', {mixed: !isSimple})
-        .ele('xs:sequence')
-        .ele('xs:element', {name: 'Item'})
-        .ele('xs:complexType')
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType", { mixed: !isSimple })
+        .ele("xs:sequence")
+        .ele("xs:element", { name: "Item" })
+        .ele("xs:complexType")
 
       if (!isSimple) {
         dom = dom
-          .ele('xs:complexContent')
-          .ele('xs:extension', {base: iterType})
+          .ele("xs:complexContent")
+          .ele("xs:extension", { base: iterType })
       }
 
       dom = dom
-        .ele('xs:attribute', {name: 'type', type: 'xs:string'}).up()
-        .ele('xs:attribute', {name: 'key', type: 'xs:string'}).up()
+        .ele("xs:attribute", { name: "type", type: "xs:string" })
+        .up()
+        .ele("xs:attribute", { name: "key", type: "xs:string" })
+        .up()
 
       if (!isSimple) {
         dom = dom
@@ -300,98 +358,151 @@ class XSDGenerator {
         .up() // </xs:sequence>
         .up() // </xs:complexType>
         .up() // </xs:element>
-    } else if (type.startsWith(NativeTypeEnum.STRUCT) && type !== 'struct void') {
+    } else if (
+      type.startsWith(NativeTypeEnum.STRUCT) &&
+      type !== "struct void"
+    ) {
       // STRUCT<>
-      const structName = type.split(' ')[1]
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType',)
-        .ele('xs:complexContent')
-        .ele('xs:extension', {base: structName})
-        .ele('xs:attribute', {name: 'type', type: 'xs:string'}).up()
+      const structName = type.split(" ")[1]
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:complexContent")
+        .ele("xs:extension", { base: structName })
+        .ele("xs:attribute", { name: "type", type: "xs:string" })
+        .up()
         .up()
         .up()
         .up()
         .up()
     } else if (mappingType === NativeTypeEnum.ENUM) {
       // ENUM
-      dom = dom.ele('xs:element', {name: field.name, type: 'xs:string'}).up()
-    } else if ([NativeTypeEnum.VEC2, NativeTypeEnum.VEC2V].includes(<NativeTypeEnum>type)) {
+      dom = dom.ele("xs:element", { name: field.name, type: "xs:string" }).up()
+    } else if (
+      [NativeTypeEnum.VEC2, NativeTypeEnum.VEC2V].includes(<NativeTypeEnum>type)
+    ) {
       // VEC2(V)
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'x', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'y', type: 'RAGEMixedDecimal'}).up()
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "x", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "y", type: "RAGEMixedDecimal" })
         .up()
         .up()
-    } else if ([NativeTypeEnum.VEC3, NativeTypeEnum.VEC3V].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'x', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'y', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'z', type: 'RAGEMixedDecimal'}).up()
+        .up()
+    } else if (
+      [NativeTypeEnum.VEC3, NativeTypeEnum.VEC3V].includes(<NativeTypeEnum>type)
+    ) {
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "x", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "y", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "z", type: "RAGEMixedDecimal" })
         .up()
         .up()
-    } else if ([NativeTypeEnum.VEC4, NativeTypeEnum.VEC4V].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'x', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'y', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'z', type: 'RAGEMixedDecimal'}).up()
-        .ele('xs:attribute', {name: 'w', type: 'RAGEMixedDecimal'}).up()
+        .up()
+    } else if (
+      [NativeTypeEnum.VEC4, NativeTypeEnum.VEC4V].includes(<NativeTypeEnum>type)
+    ) {
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "x", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "y", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "z", type: "RAGEMixedDecimal" })
+        .up()
+        .ele("xs:attribute", { name: "w", type: "RAGEMixedDecimal" })
         .up()
         .up()
-    } else if ([NativeTypeEnum.FLOAT, NativeTypeEnum.FLOAT16].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'RAGEMixedDecimal'}).up()
+        .up()
+    } else if (
+      [NativeTypeEnum.FLOAT, NativeTypeEnum.FLOAT16].includes(
+        <NativeTypeEnum>type
+      )
+    ) {
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "RAGEMixedDecimal" })
+        .up()
         .up()
         .up()
     } else if ([NativeTypeEnum.BOOL].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'xs:boolean'}).up()
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "xs:boolean" })
+        .up()
         .up()
         .up()
     } else if ([NativeTypeEnum.INT].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'xs:integer'}).up()
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "xs:integer" })
         .up()
         .up()
-    } else if ([NativeTypeEnum.UINT, NativeTypeEnum.UINT64].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'RAGEHexAddress'}).up()
+        .up()
+    } else if (
+      [NativeTypeEnum.UINT, NativeTypeEnum.UINT64].includes(
+        <NativeTypeEnum>type
+      )
+    ) {
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "RAGEHexAddress" })
+        .up()
         .up()
         .up()
     } else if (type === `struct void`) {
-      dom = dom.ele('xs:element', {name: field.name, type: 'RAGEVoidValue'}).up()
-    } else if ([NativeTypeEnum.UCHAR, NativeTypeEnum.USHORT].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'RAGEUnsignedValue'}).up()
+      dom = dom
+        .ele("xs:element", { name: field.name, type: "RAGEVoidValue" })
+        .up()
+    } else if (
+      [NativeTypeEnum.UCHAR, NativeTypeEnum.USHORT].includes(
+        <NativeTypeEnum>type
+      )
+    ) {
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "RAGEUnsignedValue" })
         .up()
         .up()
-    } else if ([NativeTypeEnum.MATRIX34, NativeTypeEnum.MATRIX34V].includes(<NativeTypeEnum>type)) {
+        .up()
+    } else if (
+      [NativeTypeEnum.MATRIX34, NativeTypeEnum.MATRIX34V].includes(
+        <NativeTypeEnum>type
+      )
+    ) {
       // TODO: matrix34
     } else if ([NativeTypeEnum.CHAR].includes(<NativeTypeEnum>type)) {
-      dom = dom.ele('xs:element', {name: field.name})
-        .ele('xs:complexType')
-        .ele('xs:attribute', {name: 'value', type: 'xs:nonNegativeInteger'}).up()
+      dom = dom
+        .ele("xs:element", { name: field.name })
+        .ele("xs:complexType")
+        .ele("xs:attribute", { name: "value", type: "xs:nonNegativeInteger" })
+        .up()
         .up()
         .up()
     } else {
       const xsdType = field.type
         ? this.nativeToXSDType(field.type)
-        : 'xs:nonNegativeInteger' // enum values
-      dom = dom.ele('xs:element', {name: field.name, type: xsdType}).up()
+        : "xs:nonNegativeInteger" // enum values
+      dom = dom.ele("xs:element", { name: field.name, type: xsdType }).up()
     }
 
-    return dom;
+    return dom
   }
 
   public static compile(natives: Natives, tick: () => any): XMLBuilder {
-    let dom = create({version: "1.0"}).ele("xs:schema", {
+    let dom = create({ version: "1.0" }).ele("xs:schema", {
       "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
     })
 
@@ -402,8 +513,8 @@ class XSDGenerator {
       tick()
       // generate reusable type
       dom = dom
-        .ele("xs:complexType", {name: struct.name, mixed: true})
-        .ele("xs:choice", {minOccurs: 0, maxOccurs: "unbounded"})
+        .ele("xs:complexType", { name: struct.name, mixed: true })
+        .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
       Object.values(struct.fields).forEach(
         f => (dom = this.generateElement(natives, dom, f))
       )
@@ -411,10 +522,11 @@ class XSDGenerator {
 
       // generate element
       dom = dom
-        .ele("xs:element", {name: struct.name})
+        .ele("xs:element", { name: struct.name })
         .ele("xs:complexType")
         .ele("xs:complexContent")
-        .ele('xs:extension', {base: struct.name}).up()
+        .ele("xs:extension", { base: struct.name })
+        .up()
         .up()
         .up()
         .up()
@@ -423,12 +535,12 @@ class XSDGenerator {
     natives.enums.forEach(enumData => {
       tick()
       dom = dom
-        .ele("xs:complexType", {name: enumData.name})
-        .ele("xs:choice", {minOccurs: 0, maxOccurs: "unbounded"})
+        .ele("xs:complexType", { name: enumData.name })
+        .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
       Object.keys(enumData).forEach(k => {
         if (k.match(/^\d+/)) return // these are invalid XSD names
         dom = dom
-          .ele("xs:element", {name: k, type: "xs:positiveInteger"})
+          .ele("xs:element", { name: k, type: "xs:positiveInteger" })
           .up()
       })
       dom = dom.up().up()

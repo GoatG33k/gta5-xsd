@@ -23,9 +23,9 @@ export interface StructPropertyData {
 }
 
 export interface EnumData {
-  name: string;
-  parent?: never;
-  fields: { [key: string]: EnumPropertyData };
+  name: string
+  parent?: never
+  fields: { [key: string]: EnumPropertyData }
 }
 
 // export type EnumData = { [key: string]: EnumPropertyData } & { name: string }

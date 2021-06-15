@@ -93,12 +93,12 @@ export class DumpParser {
           properties[key] = <EnumPropertyData>{
             name: key,
             value: +value.slice(0, value.length - 2)
-          } 
+          }
         })
-        const enumData:EnumData = {
+        const enumData: EnumData = {
           name: type,
-          fields: properties as {[key:string]:EnumPropertyData}
-        } 
+          fields: properties as { [key: string]: EnumPropertyData }
+        }
         enumMap.set(type, enumData)
         entries.push(enumData)
       } else {
