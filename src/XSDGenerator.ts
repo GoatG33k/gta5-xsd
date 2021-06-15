@@ -208,11 +208,6 @@ class XSDGenerator {
           targetType = null
       }
 
-      // special case for array<struct void>
-      if (type.split(" ")[1] === NativeTypeEnum.VOID) {
-        targetType = "RAGEVoidValue"
-      }
-
       if (targetType) {
         dom = dom
           .ele("xs:element", {
@@ -222,6 +217,22 @@ class XSDGenerator {
             maxOccurs: "unbounded"
           })
           .up()
+      } else if (type === "struct void") {
+        // array<struct void>
+        dom = dom
+          .ele("xs:element", { name: field.name })
+          .ele("xs:complexType")
+          .ele("xs:sequence")
+          .ele("xs:element", {
+            name: "Item",
+            minOccurs: 0,
+            maxOccurs: "unbounded",
+            type: "RAGEVoidValue"
+          })
+          .up() // </xs:element>
+          .up() // </xs:sequence>
+          .up() // </xs:complexType>
+          .up() // </xs:element>
       } else if (baseType === NativeTypeEnum.STRUCT) {
         dom = dom
           .ele("xs:element", { name: field.name })
