@@ -90,15 +90,15 @@ export class DumpParser {
         // parse enum
         attributeLines.forEach(line => {
           let [key, value] = line.split(" = ")
-          properties[key] = {
+          properties[key] = <EnumPropertyData>{
             name: key,
             value: +value.slice(0, value.length - 2)
-          } as EnumPropertyData
+          } 
         })
-        const enumData = {
+        const enumData:EnumData = {
           name: type,
-          ...properties
-        } as EnumData
+          fields: properties as {[key:string]:EnumPropertyData}
+        } 
         enumMap.set(type, enumData)
         entries.push(enumData)
       } else {
@@ -127,9 +127,6 @@ export class DumpParser {
                   if (!unsafeStruct.parent) {
                     loadedStructs.push(unsafeStruct.name)
                   } else {
-                    if (typeof unsafeStruct.parent !== "string") {
-                      return
-                    }
                     // if it has a parent, but literally is not in the dump, mark it as resolved
                     if (!structMap.has(unsafeStruct.parent)) {
                       loadedStructs.push(unsafeStruct.name)

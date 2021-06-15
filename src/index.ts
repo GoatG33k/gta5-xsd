@@ -49,12 +49,12 @@ async function main(): Promise<void> {
       progressBar.curr = 0
       progressBar.total = totalElements
       progressBar.render({ step: "Generate XSD".padEnd(15) })
-      const xsd = XSDGenerator.generate(natives, () => {
+      const xsd = XSDGenerator.compile(natives, () => {
         progressBar.tick()
       })
       fs.writeFileSync(
         path.resolve(__dirname, "..", outFilename),
-        xsd.toString()
+        xsd.end({prettyPrint:true})
       )
       progressBar.terminate()
     })

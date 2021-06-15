@@ -22,7 +22,13 @@ export interface StructPropertyData {
   comment: string
 }
 
-export type EnumData = { [key: string]: EnumPropertyData } & { name: string }
+export interface EnumData {
+  name: string;
+  parent?: never;
+  fields: { [key: string]: EnumPropertyData };
+}
+
+// export type EnumData = { [key: string]: EnumPropertyData } & { name: string }
 
 export type NativeVec2 = { x: number; y: number }
 export type NativeVec3 = { x: number; y: number; z: number }
