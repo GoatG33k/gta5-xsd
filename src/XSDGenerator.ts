@@ -525,7 +525,7 @@ class XSDGenerator {
       // generate reusable type
       dom = dom
         .ele("xs:complexType", { name: struct.name, mixed: true })
-        .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
+        .ele("xs:sequence", { minOccurs: 0, maxOccurs: "unbounded" })
       Object.values(struct.fields).forEach(
         f => (dom = this.generateElement(natives, dom, f))
       )
