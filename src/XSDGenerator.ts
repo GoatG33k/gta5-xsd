@@ -522,10 +522,17 @@ class XSDGenerator {
 
     natives.structs.forEach(struct => {
       tick()
-      // generate reusable type
+      /* generate reusable type */
+
+      // determine whether we can trust the order of the struct properties
+      const isMergedType = !!struct.parent
+
       dom = dom
         .ele("xs:complexType", { name: struct.name, mixed: true })
-        .ele("xs:sequence", { minOccurs: 0, maxOccurs: "unbounded" })
+        .ele(isMergedType ? "xs:choice" : "xs:sequence", {
+          minOccurs: 0,
+          maxOccurs: "unbounded"
+        })
       Object.values(struct.fields).forEach(
         f => (dom = this.generateElement(natives, dom, f))
       )

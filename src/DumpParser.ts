@@ -141,10 +141,13 @@ export class DumpParser {
                       const parentStruct = structMap.get(unsafeStruct.parent)
                       const struct = structMap.get(unsafeStruct.name)
                       if (!struct || !parentStruct) return unsafeStruct
-                      struct.fields = Object.assign({}, {
-                        ...parentStruct.fields, // make sure to insert BEFORE
-                        ...struct.fields,
-                      })
+                      struct.fields = Object.assign(
+                        {},
+                        {
+                          ...parentStruct.fields, // make sure to insert BEFORE
+                          ...struct.fields
+                        }
+                      )
                       structMap.set(unsafeStruct.name, struct)
                       parentStruct.children.push(unsafeStruct.name)
                       structMap.set(parentStruct.name, parentStruct)
