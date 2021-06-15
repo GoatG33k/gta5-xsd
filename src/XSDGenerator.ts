@@ -527,16 +527,23 @@ class XSDGenerator {
       // determine whether we can trust the order of the struct properties
       const isMergedType = !!struct.parent
 
-      dom = dom
-        .ele("xs:complexType", { name: struct.name, mixed: true })
-        .ele(isMergedType ? "xs:choice" : "xs:sequence", {
-          minOccurs: 0,
-          maxOccurs: "unbounded"
+      dom = dom.ele("xs:complexType", { name: struct.name, mixed: true })
+      if (isMergedType) {
+        const fieldCount = Object.keys(struct.fields).length
+        dom = dom.ele("xs:choice", {
+          minOccurs: fieldCount,
+          maxOccurs: fieldCount
         })
+      } else {
+        dom = dom.ele("xs:sequence")
+      }
       Object.values(struct.fields).forEach(
         f => (dom = this.generateElement(natives, dom, f))
       )
-      dom = dom.up().up()
+
+      dom = dom
+        .up() // </xs:choice> or </xs:sequence>
+        .up() // </xs:complexType>
 
       // generate element
       dom = dom
