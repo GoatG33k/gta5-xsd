@@ -1,4 +1,3 @@
-export * from "./Struct"
 export * from "./StructProperty"
 
 /** Base Types **/
@@ -7,6 +6,7 @@ import StructProperty from "./StructProperty"
 export type StructData = {
   name: string
   parent?: string
+  children: string[]
   fields: { [property: string]: StructProperty }
 }
 

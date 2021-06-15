@@ -79,11 +79,12 @@ export class DumpParser {
             comment: comment
           })
         })
-        const struct = {
+        const struct: StructData = {
           name: type,
           parent: parentType,
-          fields: properties
-        } as StructData
+          fields: properties as { [key: string]: StructProperty },
+          children: []
+        }
         structMap.set(type, struct)
         entries.push(struct)
       } else if (kind === "enum") {
@@ -145,6 +146,8 @@ export class DumpParser {
                         ...parentStruct.fields
                       })
                       structMap.set(unsafeStruct.name, struct)
+                      parentStruct.children.push(unsafeStruct.name)
+                      structMap.set(parentStruct.name, parentStruct)
                       loadedStructs.push(unsafeStruct.name)
                       return undefined
                     }
@@ -167,6 +170,16 @@ export class DumpParser {
       logger.error(
         `Failed to resolve all dependencies within 10 loops, please report this as a bug.`
       )
+    }
+
+    // Now, reverse through the elements to add all fields to the parents
+    for (let [key, struct] of structMap.entries()) {
+      if (!struct.children.length) continue
+      struct.children.forEach(childName => {
+        const child = structMap.get(childName)
+        if (child) Object.assign(struct.fields, child.fields)
+      })
+      structMap.set(key, struct)
     }
 
     // FIXME: patch this in a better way
