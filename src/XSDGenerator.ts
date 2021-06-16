@@ -129,7 +129,9 @@ class XSDGenerator {
     // RAGEUnsignedValue
     dom = dom
       .ele("xs:simpleType", { name: "RAGEUnsignedValue" })
-      .ele("xs:restriction", { base: "xs:nonNegativeInteger" })
+      .ele("xs:restriction", { base: "xs:string" })
+      .ele('xs:pattern', {value: '(-1|[0-9]+)'})
+      .up()
       .up()
       .up()
     return dom
