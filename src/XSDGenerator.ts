@@ -103,7 +103,7 @@ class XSDGenerator {
     dom = dom
       .ele("xs:simpleType", { name: "RAGEMixedDecimal" })
       .ele("xs:restriction", { base: "xs:string" })
-      .ele("xs:pattern", { value: "(-)?[0-9]+(.-?[0-9]+(e[-+][0-9]+)?)?" })
+      .ele("xs:pattern", { value: "(-)?[0-9]+(.-?[0-9]+(e[-+][0-9]+)?)?f?" })
       .up()
       .up()
       .up()
