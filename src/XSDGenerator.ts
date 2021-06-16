@@ -103,7 +103,9 @@ class XSDGenerator {
     dom = dom
       .ele("xs:simpleType", { name: "RAGEMixedDecimal" })
       .ele("xs:restriction", { base: "xs:string" })
-      .ele("xs:pattern", { value: "(0x[0-9a-fA-F]+|-?[0-9]+(\\.-?[0-9]+((f|e-?[0-9]+))?)?)" })
+      .ele("xs:pattern", {
+        value: "(0x[0-9a-fA-F]+|-?[0-9]+(\\.-?[0-9]+((f|e-?[0-9]+))?)?)"
+      })
       .up()
       .up()
       .up()
@@ -112,9 +114,7 @@ class XSDGenerator {
     dom = dom
       .ele("xs:simpleType", { name: "RAGEHexAddress" })
       .ele("xs:restriction", { base: "xs:string" })
-      .ele("xs:pattern", { value: "0x[0-9A-F]{1,16}" })
-      .up()
-      .ele("xs:pattern", { value: "[0-9]+" })
+      .ele("xs:pattern", { value: "([0-9]+|0x[0-9a-fA-F]{1,16})" })
       .up()
       .up()
       .up()
