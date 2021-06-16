@@ -283,7 +283,7 @@ class XSDGenerator {
           )
           if (type.startsWith(NativeTypeEnum.ARRAY) && nestedStruct) {
             const structField: StructProperty = {
-              name: "item",
+              name: "Item",
               type: Object.values(NativeTypeEnum).filter(s =>
                 type.startsWith(s)
               )[0]!,
@@ -452,7 +452,9 @@ class XSDGenerator {
         .up()
         .up()
         .up()
-    } else if ([NativeTypeEnum.INT].includes(<NativeTypeEnum>type)) {
+    } else if (
+      [NativeTypeEnum.INT, NativeTypeEnum.SHORT].includes(<NativeTypeEnum>type)
+    ) {
       dom = dom
         .ele("xs:element", { name: field.name })
         .ele("xs:complexType")
@@ -528,15 +530,10 @@ class XSDGenerator {
       const isMergedType = !!struct.parent
 
       dom = dom.ele("xs:complexType", { name: struct.name, mixed: true })
-      if (isMergedType) {
-        const fieldCount = Object.keys(struct.fields).length
-        dom = dom.ele("xs:choice", {
-          minOccurs: fieldCount,
-          maxOccurs: fieldCount
-        })
-      } else {
-        dom = dom.ele("xs:sequence")
-      }
+      const fieldCount = Object.keys(struct.fields).length
+      dom = dom.ele("xs:choice", {
+        maxOccurs: fieldCount ? fieldCount : undefined
+      })
       Object.values(struct.fields).forEach(
         f => (dom = this.generateElement(natives, dom, f))
       )
