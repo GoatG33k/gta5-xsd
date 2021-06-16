@@ -532,6 +532,7 @@ class XSDGenerator {
       dom = dom.ele("xs:complexType", { name: struct.name, mixed: true })
       const fieldCount = Object.keys(struct.fields).length
       dom = dom.ele("xs:choice", {
+        minOccurs: 0,
         maxOccurs: fieldCount ? fieldCount : undefined
       })
       Object.values(struct.fields).forEach(
