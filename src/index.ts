@@ -21,7 +21,12 @@ async function main(): Promise<void> {
       // ["rdr2.txt", "RDR2.xsd"]
     ].map(async ([filename, outFilename]) => {
       const dumpPath = path.resolve(dumpsDir, filename)
-      const dumpData = fs.readFileSync(dumpPath, "utf-8")
+      const dumpData = fs
+        .readFileSync(dumpPath, "utf-8")
+        .split("\n")
+        .map(s => s.trim())
+        .filter(s => !s.startsWith("//"))
+        .join("\n")
 
       let progressBar = new ProgressBar(":step [:bar] (:current/:total)", {
         total: 0,

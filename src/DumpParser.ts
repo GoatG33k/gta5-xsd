@@ -128,30 +128,49 @@ export class DumpParser {
                   if (!unsafeStruct.parent) {
                     loadedStructs.push(unsafeStruct.name)
                   } else {
+                    const { name, parent } = unsafeStruct
                     // if it has a parent, but literally is not in the dump, mark it as resolved
-                    if (!structMap.has(unsafeStruct.parent)) {
-                      loadedStructs.push(unsafeStruct.name)
-                    }
-                    // if it has a parent, make sure it's loaded
-                    if (!loadedStructs.includes(unsafeStruct.parent)) {
+                    if (!structMap.has(parent)) loadedStructs.push(name)
+                    // if it has a parent, make sure it and its parents are loaded
+                    if (!loadedStructs.includes(parent)) {
                       // not loaded, wait for it to be
                       return unsafeStruct
                     } else {
-                      // update the properties
-                      const parentStruct = structMap.get(unsafeStruct.parent)
-                      const struct = structMap.get(unsafeStruct.name)
-                      if (!struct || !parentStruct) return unsafeStruct
-                      struct.fields = Object.assign(
-                        {},
-                        {
-                          ...parentStruct.fields, // make sure to insert BEFORE
-                          ...struct.fields
+                      // make sure all parents are loaded
+                      const { name } = unsafeStruct
+                      let extendsTree = [name]
+                      let currentStruct = unsafeStruct
+                      let parent
+                      do {
+                        if (!currentStruct.parent) {
+                          parent = undefined
+                          continue
                         }
-                      )
-                      structMap.set(unsafeStruct.name, struct)
-                      parentStruct.children.push(unsafeStruct.name)
-                      structMap.set(parentStruct.name, parentStruct)
-                      loadedStructs.push(unsafeStruct.name)
+                        parent = structMap.get(currentStruct.parent!)
+                        if (!parent) return unsafeStruct // not loaded
+                        currentStruct = parent
+                        extendsTree.push(currentStruct.name)
+                      } while (parent)
+
+                      // reverse the dependency tree to be parent -> child
+                      extendsTree = extendsTree.reverse()
+
+                      // recursively apply the properties from the top-most parent struct
+                      unsafeStruct.fields = extendsTree
+                        .map(n => structMap.get(n)!)
+                        .reduce((fields, struct) => {
+                          fields = Object.assign(
+                            {},
+                            {
+                              ...fields,
+                              ...struct.fields
+                            }
+                          )
+                          return fields
+                        }, {})
+
+                      structMap.set(name, unsafeStruct)
+                      loadedStructs.push(name)
                       return undefined
                     }
                   }
@@ -175,18 +194,31 @@ export class DumpParser {
       )
     }
 
-    // Now, reverse through the elements to add all fields to the parents
-    for (let [key, struct] of structMap.entries()) {
-      if (!struct.children.length) continue
-      struct.children.forEach(childName => {
-        const child = structMap.get(childName)
-        if (child) Object.assign(struct.fields, child.fields)
-      })
-      structMap.set(key, struct)
-    }
+    // pass #2 - calculate children
+    for (let baseStructName of structMap.keys()) {
+      // build list of all children
+      const foundChildren = []
+      let resolveQueue = [baseStructName]
+      do {
+        const oldResolveQueue = [...resolveQueue]
+        const newResolveQueue = []
+        for (let resolveQueueName of oldResolveQueue) {
+          // find all elements with resolveQueueName as a parent, and add them to newResolveQueue
+          for (let deepStructName of structMap.keys()) {
+            const deepStruct = structMap.get(deepStructName)!
+            if (deepStruct.parent !== resolveQueueName) continue
+            newResolveQueue.push(deepStructName)
+            foundChildren.push(deepStructName)
+          }
+        }
+        resolveQueue = newResolveQueue
+      } while (resolveQueue.length)
 
-    // FIXME: patch this in a better way
-    enumMap.set("eWindowId", <EnumData>{ name: "eWindowId" })
+      // load from data
+      const struct = structMap.get(baseStructName)!
+      struct.children = foundChildren
+      structMap.set(baseStructName, struct)
+    }
 
     return {
       structs: structMap,

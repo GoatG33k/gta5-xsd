@@ -1,0 +1,11 @@
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Test Generator
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: yarn
+      - name: Run Generator
+        run: yarn build

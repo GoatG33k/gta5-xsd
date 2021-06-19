@@ -130,7 +130,7 @@ class XSDGenerator {
     dom = dom
       .ele("xs:simpleType", { name: "RAGEUnsignedValue" })
       .ele("xs:restriction", { base: "xs:string" })
-      .ele('xs:pattern', {value: '(-1|[0-9]+)'})
+      .ele("xs:pattern", { value: "(-1|[0-9]+)" })
       .up()
       .up()
       .up()
@@ -236,30 +236,42 @@ class XSDGenerator {
           .up() // </xs:complexType>
           .up() // </xs:element>
       } else if (baseType === NativeTypeEnum.STRUCT) {
+        // GENERATE ARRAY STRUCT
         dom = dom
           .ele("xs:element", { name: field.name })
           .ele("xs:complexType", { mixed: true })
-          .ele("xs:sequence")
+          // TODO: more precise max. occurs
+          .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
 
         const structName = type.split(" ")[1]
+        const childStructs = natives.structs.get(structName)!.children
 
-        // annoying fix because RAGE is silly
-        const itemName = structName.startsWith("rage__") ? "item" : "Item"
-        dom = dom
-          .ele("xs:element", {
-            name: itemName,
-            minOccurs: 0,
-            maxOccurs: "unbounded"
-          })
-          .ele("xs:complexType")
-          .ele("xs:complexContent")
-          .ele("xs:extension", { base: structName })
-          .ele("xs:attribute", { name: "type", type: "xs:string" })
-          .up()
-          .up() // </xs:extension>
-          .up() // </xs:complexContent>
-          .up() // </xs:complexType>
-          .up() // </xs:element>
+        ;(<[string, string][]>[
+          ["Item", structName], // support R*'s ambiguity, but also make sure
+          ["item", structName], // these types work outside of rage-lint (to some degree)
+          ["Item__" + structName, structName],
+          ...childStructs.map(
+            sibling => [`Item__${sibling}`, sibling] as [string, string]
+          )
+        ]).map(([itemName, structName]) => {
+          dom = dom
+            .ele("xs:element", {
+              name: itemName,
+              minOccurs: 0,
+              maxOccurs: "unbounded"
+            })
+            .ele("xs:complexType")
+            .ele("xs:complexContent")
+            .ele("xs:extension", {
+              base: structName
+            })
+            .ele("xs:attribute", { name: "type", type: "xs:string" })
+            .up()
+            .up() // </xs:extension>
+            .up() // </xs:complexContent>
+            .up() // </xs:complexType>
+            .up() // </xs:element>
+        })
 
         dom = dom.up().up().up()
       } else {
@@ -279,10 +291,10 @@ class XSDGenerator {
               .up()
           })
         } else {
-          // nested array (array<array<struct Abc>>)
           const nestedStruct = /^array<(?:(?:struct|enum)\s)?([\w\d_]+)>$/.exec(
             type
           )
+          // nested array (array<array<struct Abc>>)
           if (type.startsWith(NativeTypeEnum.ARRAY) && nestedStruct) {
             const structField: StructProperty = {
               name: "Item",
@@ -339,25 +351,40 @@ class XSDGenerator {
       // MAP<>
       const [, iterType] = braceMatches[2].split(" ")
       let isSimple = !iterType
+      const isMap = (braceMatches[2] || "").startsWith(NativeTypeEnum.MAP)
 
       dom = dom
         .ele("xs:element", { name: field.name })
         .ele("xs:complexType", { mixed: !isSimple })
-        .ele("xs:sequence")
+        .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
         .ele("xs:element", { name: "Item" })
         .ele("xs:complexType")
 
       if (!isSimple) {
+        // regular inherited entity
+        dom = dom.ele("xs:complexContent").ele("xs:extension", {
+          base: iterType
+        })
+      } else if (isMap) {
+        // nested map<>
         dom = dom
-          .ele("xs:complexContent")
-          .ele("xs:extension", { base: iterType })
+          .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
+          .ele("xs:element", { name: "Item" })
+          .ele("xs:complexType")
+          .ele("xs:attribute", { name: "value", type: "xs:string" })
+          .up() // </xs:attribute>
+          .ele("xs:attribute", { name: "key", type: "xs:string" })
+          .up() // </xs:attribute>
+          .up() // </xs:complexType>
+          .up() // </xs:element>
+          .up() // </xs:choice>
       }
 
       dom = dom
         .ele("xs:attribute", { name: "type", type: "xs:string" })
-        .up()
+        .up() // </xs:attribute>
         .ele("xs:attribute", { name: "key", type: "xs:string" })
-        .up()
+        .up() // </xs:attribute>
 
       if (!isSimple) {
         dom = dom
@@ -381,7 +408,9 @@ class XSDGenerator {
         .ele("xs:element", { name: field.name })
         .ele("xs:complexType")
         .ele("xs:complexContent")
-        .ele("xs:extension", { base: structName })
+        .ele("xs:extension", {
+          base: structName
+        })
         .ele("xs:attribute", { name: "type", type: "xs:string" })
         .up()
         .up()
@@ -521,16 +550,36 @@ class XSDGenerator {
       "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
     })
 
+    // version annotation
+    const now = new Date()
+    dom = dom
+      .ele("xs:annotation")
+      .ele("xs:appinfo")
+      .txt(
+        `GTA5.xsd (built ${now.getUTCFullYear()}-${now
+          .getUTCMonth()
+          .toString()
+          .padStart(2, "0")}-${now
+          .getUTCDay()
+          .toString()
+          .padStart(2, "0")}) - https://github.com/GoatG33k/gta5-xsd/`
+      )
+      .up() // </xs:appinfo>
+      .ele('xs:documentation', {'xml:lang': "en"})
+      .txt("XML Schema Definition for Grand Theft Auto V and " +
+        "Red Dead Redemption 2, created with love by GoatGeek")
+      .up() // </xs:documentation>
+      .up() // </xs:annotation>
+
     dom = CompatStructs.inject(dom)
     dom = this.generateRageElements(dom)
 
+    // generate structs
     natives.structs.forEach(struct => {
       tick()
       /* generate reusable type */
 
       // determine whether we can trust the order of the struct properties
-      const isMergedType = !!struct.parent
-
       dom = dom.ele("xs:complexType", { name: struct.name, mixed: true })
       const fieldCount = Object.keys(struct.fields).length
       dom = dom.ele("xs:choice", {
@@ -547,13 +596,10 @@ class XSDGenerator {
 
       // generate element
       dom = dom
-        .ele("xs:element", { name: struct.name })
-        .ele("xs:complexType")
-        .ele("xs:complexContent")
-        .ele("xs:extension", { base: struct.name })
-        .up()
-        .up()
-        .up()
+        .ele("xs:element", {
+          name: struct.name,
+          type: struct.name
+        })
         .up()
     })
 
