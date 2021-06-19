@@ -33,6 +33,7 @@ struct BaseShopPedApparel : BaseShopItem
 	array<struct ComponentDescription>     variantComponents;               // type:ARRAY.ATARRAY
 	array<struct PropDescription>          variantProps;                    // type:ARRAY.ATARRAY
 	short                                  locate;                          // type:SHORT.0
+	short                                  scriptSaveData;                  // type:SHORT.0
 };
 
 struct BoxOccluder
@@ -1171,6 +1172,7 @@ struct CAmmoRocketInfo : CAmmoProjectileInfo
 
 struct CAmmoThrownInfo : CAmmoProjectileInfo
 {
+    vec3                             UntriggeredProximityLightColor;  // type:VECTOR3.0
 	float                            ThrownForce;                     // type:FLOAT.0
 	float                            ThrownForceFromVehicle;          // type:FLOAT.0
 	int                              AmmoMaxMPBonus;                  // type:INT.0
@@ -5078,7 +5080,7 @@ struct CPedModelInfo__PersonalityMovementModes__MovementMode__ClipSets
 	float                            IdleTransitionBlendOutTime;      // type:FLOAT.0
 	array<string>                    IdleTransitions;                 // type:ARRAY.ATARRAY
 	string                           UnholsterClipSetId;              // type:STRING.ATHASHVALUE
-	string                           UnholsterClipData;               // type:STRING.ATHASHVALUE
+	struct void                      UnholsterClipData;               // type:STRING.ATHASHVALUE
 };
 
 struct CPedModelInfo__PersonalityMovementModes__sUnholsterClipData
@@ -14049,6 +14051,7 @@ struct CWeaponInfo : CItemInfo
 	float                                                          AccuracySpread;                  // type:FLOAT.0
 	float                                                          AccurateModeAccuracyModifier;    // type:FLOAT.0
 	float                                                          RunAndGunAccuracyModifier;       // type:FLOAT.0
+	float                                                          RunAndGunAccuracyMaxModifier;    // type:FLOAT.0
 	float                                                          RunAndGunAccuracyMinOverride;    // type:FLOAT.0
 	float                                                          RecoilAccuracyMax;               // type:FLOAT.0
 	float                                                          RecoilErrorTime;                 // type:FLOAT.0
@@ -14133,9 +14136,11 @@ struct CWeaponInfo : CItemInfo
 	string                                                         FireCameraHash;                  // type:STRING.ATHASHVALUE
 	string                                                         CoverCameraHash;                 // type:STRING.ATHASHVALUE
 	string                                                         CoverReadyToFireCameraHash;      // type:STRING.ATHASHVALUE
+	string                                                         AssistedAimingCameraHash;        // type:STRING.ATHASHVALUE
 	string                                                         RunAndGunCameraHash;             // type:STRING.ATHASHVALUE
 	string                                                         CinematicShootingCameraHash;     // type:STRING.ATHASHVALUE
 	string                                                         AlternativeOrScopedCameraHash;   // type:STRING.ATHASHVALUE
+	string                                                         AssistedAlternativeOrScopedCameraHash;   // type:STRING.ATHASHVALUE
 	string                                                         RunAndGunAlternativeOrScopedCameraHash; // type:STRING.ATHASHVALUE
 	string                                                         CinematicShootingAlternativeOrScopedCameraHash; // type:STRING.ATHASHVALUE
 	string                                                         PovTurretCameraHash;             // type:STRING.ATHASHVALUE
@@ -14318,6 +14323,7 @@ struct CWeaponInfo__sFx
 	string                           FlashFxAlt;                      // type:STRING.ATHASHVALUE
 	string                           FlashFxFP;                       // type:STRING.ATHASHVALUE
 	string                           FlashFxFPAlt;                    // type:STRING.ATHASHVALUE
+	string                           FlashFxAltFP;                    // type:STRING.ATHASHVALUE
 	string                           MuzzleSmokeFx;                   // type:STRING.ATHASHVALUE
 	string                           MuzzleSmokeFxFP;                 // type:STRING.ATHASHVALUE
 	float                            MuzzleSmokeFxMinLevel;           // type:FLOAT.0
@@ -15483,6 +15489,7 @@ struct WeaponShopItem : BaseShopItem
 	string                                weaponUppercase;                 // type:STRING.ATSTRING
 	array<struct ShopWeaponComponent>     weaponComponents;                // type:ARRAY.ATARRAY
 	bool                                  availableInSP;                   // type:BOOL.0
+	uint                                  id;                              // type:UINT.0
 };
 
 struct WeaponShopItemArray
