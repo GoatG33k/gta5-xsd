@@ -339,6 +339,7 @@ class XSDGenerator {
       // MAP<>
       const [, iterType] = braceMatches[2].split(" ")
       let isSimple = !iterType
+      const isMap = (braceMatches[2] || "").startsWith(NativeTypeEnum.MAP)
 
       dom = dom
         .ele("xs:element", { name: field.name })
@@ -348,16 +349,30 @@ class XSDGenerator {
         .ele("xs:complexType")
 
       if (!isSimple) {
+        // regular inherited entity
+        dom = dom.ele("xs:complexContent").ele("xs:extension", {
+          base: iterType
+        })
+      } else if (isMap) {
+        // nested map<>
         dom = dom
-          .ele("xs:complexContent")
-          .ele("xs:extension", { base: iterType })
+          .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
+          .ele("xs:element", { name: "Item" })
+          .ele("xs:complexType")
+          .ele("xs:attribute", { name: "value", type: "xs:string" })
+          .up() // </xs:attribute>
+          .ele("xs:attribute", { name: "key", type: "xs:string" })
+          .up() // </xs:attribute>
+          .up() // </xs:complexType>
+          .up() // </xs:element>
+          .up() // </xs:choice>
       }
 
       dom = dom
         .ele("xs:attribute", { name: "type", type: "xs:string" })
-        .up()
+        .up() // </xs:attribute>
         .ele("xs:attribute", { name: "key", type: "xs:string" })
-        .up()
+        .up() // </xs:attribute>
 
       if (!isSimple) {
         dom = dom
