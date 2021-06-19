@@ -175,18 +175,31 @@ export class DumpParser {
       )
     }
 
-    // Now, reverse through the elements to add all fields to the parents
-    for (let [key, struct] of structMap.entries()) {
-      if (!struct.children.length) continue
-      struct.children.forEach(childName => {
-        const child = structMap.get(childName)
-        if (child) Object.assign(struct.fields, child.fields)
-      })
-      structMap.set(key, struct)
-    }
+    // pass #2 - calculate children
+    for (let baseStructName of structMap.keys()) {
+      // build list of all children
+      const foundChildren = []
+      let resolveQueue = [baseStructName]
+      do {
+        const oldResolveQueue = [...resolveQueue]
+        const newResolveQueue = []
+        for (let resolveQueueName of oldResolveQueue) {
+          // find all elements with resolveQueueName as a parent, and add them to newResolveQueue
+          for (let deepStructName of structMap.keys()) {
+            const deepStruct = structMap.get(deepStructName)!
+            if (deepStruct.parent !== resolveQueueName) continue
+            newResolveQueue.push(deepStructName)
+            foundChildren.push(deepStructName)
+          }
+        }
+        resolveQueue = newResolveQueue
+      } while (resolveQueue.length)
 
-    // FIXME: patch this in a better way
-    enumMap.set("eWindowId", <EnumData>{ name: "eWindowId" })
+      // load from data
+      const struct = structMap.get(baseStructName)!
+      struct.children = foundChildren
+      structMap.set(baseStructName, struct)
+    }
 
     return {
       structs: structMap,
