@@ -539,13 +539,12 @@ class XSDGenerator {
     dom = CompatStructs.inject(dom)
     dom = this.generateRageElements(dom)
 
+    // generate structs
     natives.structs.forEach(struct => {
       tick()
       /* generate reusable type */
 
       // determine whether we can trust the order of the struct properties
-      const isMergedType = !!struct.parent
-
       dom = dom.ele("xs:complexType", { name: struct.name, mixed: true })
       const fieldCount = Object.keys(struct.fields).length
       dom = dom.ele("xs:choice", {
@@ -562,13 +561,10 @@ class XSDGenerator {
 
       // generate element
       dom = dom
-        .ele("xs:element", { name: struct.name })
-        .ele("xs:complexType")
-        .ele("xs:complexContent")
-        .ele("xs:extension", { base: struct.name })
-        .up()
-        .up()
-        .up()
+        .ele("xs:element", {
+          name: struct.name,
+          type: struct.name
+        })
         .up()
     })
 
