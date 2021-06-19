@@ -130,7 +130,7 @@ class XSDGenerator {
     dom = dom
       .ele("xs:simpleType", { name: "RAGEUnsignedValue" })
       .ele("xs:restriction", { base: "xs:string" })
-      .ele('xs:pattern', {value: '(-1|[0-9]+)'})
+      .ele("xs:pattern", { value: "(-1|[0-9]+)" })
       .up()
       .up()
       .up()
@@ -236,6 +236,7 @@ class XSDGenerator {
           .up() // </xs:complexType>
           .up() // </xs:element>
       } else if (baseType === NativeTypeEnum.STRUCT) {
+        // GENERATE ARRAY STRUCT
         dom = dom
           .ele("xs:element", { name: field.name })
           .ele("xs:complexType", { mixed: true })
@@ -279,10 +280,10 @@ class XSDGenerator {
               .up()
           })
         } else {
-          // nested array (array<array<struct Abc>>)
           const nestedStruct = /^array<(?:(?:struct|enum)\s)?([\w\d_]+)>$/.exec(
             type
           )
+          // nested array (array<array<struct Abc>>)
           if (type.startsWith(NativeTypeEnum.ARRAY) && nestedStruct) {
             const structField: StructProperty = {
               name: "Item",
@@ -396,7 +397,9 @@ class XSDGenerator {
         .ele("xs:element", { name: field.name })
         .ele("xs:complexType")
         .ele("xs:complexContent")
-        .ele("xs:extension", { base: structName })
+        .ele("xs:extension", {
+          base: structName
+        })
         .ele("xs:attribute", { name: "type", type: "xs:string" })
         .up()
         .up()
