@@ -565,9 +565,11 @@ class XSDGenerator {
           .padStart(2, "0")}) - https://github.com/GoatG33k/gta5-xsd/`
       )
       .up() // </xs:appinfo>
-      .ele('xs:documentation', {'xml:lang': "en"})
-      .txt("XML Schema Definition for Grand Theft Auto V and " +
-        "Red Dead Redemption 2, created with love by GoatGeek")
+      .ele("xs:documentation", { "xml:lang": "en" })
+      .txt(
+        "XML Schema Definition for Grand Theft Auto V and " +
+          "Red Dead Redemption 2, created with love by GoatGeek"
+      )
       .up() // </xs:documentation>
       .up() // </xs:annotation>
 

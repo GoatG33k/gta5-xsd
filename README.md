@@ -5,17 +5,18 @@ This utility generates XML XSD definitions for GTA5 (and soon RDR2) so you can v
 ## Features
 
 - Fully generated definition from the [RAGE game struct dumps](https://github.com/alexguirre/gtav-DumpStructs)
-- Semi-correct type validation for each type
+- Mostly correct type validation for each type
 - **All game metadata types are supported**
-
-### Known Issues
-
-- Not all types may be correct at the moment, if you have a validation issue, please create an issue with the XML file with the issue, and the validation issue you are having
-- `map<...>` types are not generated
 
 ## Usage
 
-In the meta file you would like to check, add a `<!DOCTYPE>` element at the beginning with the root element. For example, with a **carcols** metafile, the original header would be:
+### Using [rage-lint](https://github.com/GoatG33k/rage-lint/)
+
+I recommend using [rage-lint](https://github.com/GoatG33k/rage-lint/) in order to validate your RAGE metafiles, as it has improved support for Rockstar's "unique" method, includes automatic updating, and a readable output -- all bundled into one.
+
+### In Your IDE
+
+In the XML file you would like to validate, add a `<!DOCTYPE>` element at the beginning with the root element. For example, with a **carcols** metafile, the original header would be:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -28,19 +29,21 @@ To enable validation, you will have to add the following line **BELOW** the `<?x
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE CVehicleModelInfoVarGlobal SYSTEM "https://gitcdn.xyz/repo/GoatG33k/gta5-xsd/master/GTA5.xsd">
+<!DOCTYPE CVehicleModelInfoVarGlobal SYSTEM "https://raw.githubusercontent.com/GoatG33k/gta5-xsd/master/GTA5.xsd">
 <CVehicleModelInfoVarGlobal>
   <!-- stuff -->
 </CVehicleModelInfoVarGlobal>
 ```
 
-Then, any modern IDE should allow you to download the type definitions, and your file will be type-checked against the expected game values.
+Then, any modern IDE or XML validator should allow you to download the type definitions, and your file will be type-checked against the expected game values.
 
 ## Development
 
-To generate the definitions, you will need to download the engine dumps from [alexguirre/gtav-DumpStructs (github.com)](https://github.com/alexguirre/gtav-DumpStructs).
-
 To generate the GTA5.xsd, download the `dumps/gtav/b1234.txt` and place it in `dumps/gta5.txt`, then run `yarn build`. This will output a `GTA5.xsd` file in the project root.
+
+## Credits
+
+Thanks to alexguirre for providing the GTA5/RDR2 game dumps, which are [available here](https://github.com/alexguirre/gtav-DumpStructs).
 
 ## License
 
