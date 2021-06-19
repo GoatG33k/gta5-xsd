@@ -240,27 +240,38 @@ class XSDGenerator {
         dom = dom
           .ele("xs:element", { name: field.name })
           .ele("xs:complexType", { mixed: true })
-          .ele("xs:sequence")
+          // TODO: more precise max. occurs
+          .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
 
         const structName = type.split(" ")[1]
+        const childStructs = natives.structs.get(structName)!.children
 
-        // annoying fix because RAGE is silly
-        const itemName = structName.startsWith("rage__") ? "item" : "Item"
-        dom = dom
-          .ele("xs:element", {
-            name: itemName,
-            minOccurs: 0,
-            maxOccurs: "unbounded"
-          })
-          .ele("xs:complexType")
-          .ele("xs:complexContent")
-          .ele("xs:extension", { base: structName })
-          .ele("xs:attribute", { name: "type", type: "xs:string" })
-          .up()
-          .up() // </xs:extension>
-          .up() // </xs:complexContent>
-          .up() // </xs:complexType>
-          .up() // </xs:element>
+        ;(<[string, string][]>[
+          ["Item", structName], // support R*'s ambiguity, but also make sure
+          ["item", structName], // these types work outside of rage-lint (to some degree)
+          ["Item__" + structName, structName],
+          ...childStructs.map(
+            sibling => [`Item__${sibling}`, sibling] as [string, string]
+          )
+        ]).map(([itemName, structName]) => {
+          dom = dom
+            .ele("xs:element", {
+              name: itemName,
+              minOccurs: 0,
+              maxOccurs: "unbounded"
+            })
+            .ele("xs:complexType")
+            .ele("xs:complexContent")
+            .ele("xs:extension", {
+              base: structName
+            })
+            .ele("xs:attribute", { name: "type", type: "xs:string" })
+            .up()
+            .up() // </xs:extension>
+            .up() // </xs:complexContent>
+            .up() // </xs:complexType>
+            .up() // </xs:element>
+        })
 
         dom = dom.up().up().up()
       } else {
