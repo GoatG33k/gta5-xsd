@@ -550,6 +550,27 @@ class XSDGenerator {
       "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
     })
 
+    // version annotation
+    const now = new Date()
+    dom = dom
+      .ele("xs:annotation")
+      .ele("xs:appinfo")
+      .txt(
+        `GTA5.xsd (built ${now.getUTCFullYear()}-${now
+          .getUTCMonth()
+          .toString()
+          .padStart(2, "0")}-${now
+          .getUTCDay()
+          .toString()
+          .padStart(2, "0")}) - https://github.com/GoatG33k/gta5-xsd/`
+      )
+      .up() // </xs:appinfo>
+      .ele('xs:documentation', {'xml:lang': "en"})
+      .txt("XML Schema Definition for Grand Theft Auto V and " +
+        "Red Dead Redemption 2, created with love by GoatGeek")
+      .up() // </xs:documentation>
+      .up() // </xs:annotation>
+
     dom = CompatStructs.inject(dom)
     dom = this.generateRageElements(dom)
 
