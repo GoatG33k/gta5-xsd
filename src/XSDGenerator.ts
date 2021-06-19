@@ -343,7 +343,7 @@ class XSDGenerator {
       dom = dom
         .ele("xs:element", { name: field.name })
         .ele("xs:complexType", { mixed: !isSimple })
-        .ele("xs:sequence")
+        .ele("xs:choice", { minOccurs: 0, maxOccurs: "unbounded" })
         .ele("xs:element", { name: "Item" })
         .ele("xs:complexType")
 
